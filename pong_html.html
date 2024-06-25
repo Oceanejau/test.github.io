@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcendence</title>
+    <link rel="shortcut icon" type="image/png" href="/img/icone/pingpong_img_32x32.png"/>
+    <!-- Inclure le fichier de configuration -->
+    <script src="pong_config.js"></script>
+    <!-- Script pour insérer dynamiquement la feuille de style CSS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = config.cssFileName;
+            document.head.appendChild(link);
+        });
+        function redirect() {
+            window.location.href = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae&redirect_uri=https%3A%2F%2Fgoogle.com&response_type=code";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1><span class="red">Ping</span> <span class="blue">Pong</span></h1>
+    </header>
+    <main>
+        <p>PingPong ici</p>
+    <div id="cadre_pong">
+
+        <canvas id="pongCanvas" width="800" height="400"></canvas>
+        <button id="OAuth42" onclick="redirect()">OAuth 42</button>
+    
+    <!-- Lié le fichier JavaScript externe -->
+    <script src="ping_pong.js"></script>
+</div>
+
+
+    </main>
+    <footer>
+        <p>&copy; 2024 Transcendence</p>
+    </footer>
+</body>
+</html>

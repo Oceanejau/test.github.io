@@ -1,0 +1,88 @@
+/* styles.css */
+
+
+
+/* Fonts-- */
+
+
+/*@font-face {
+    font-family: 'MyCustomFont';
+    src: url('fonts/MyCustomFont/MyCustomFont.eot'); 
+    src: url('fonts/MyCustomFont/MyCustomFont.eot?#iefix') format('embedded-opentype'), 
+         url('fonts/MyCustomFont/MyCustomFont.woff2') format('woff2'), 
+         url('fonts/MyCustomFont/MyCustomFont.woff') format('woff'), 
+         url('fonts/MyCustomFont/MyCustomFont.ttf') format('truetype'), 
+         url('fonts/MyCustomFont/MyCustomFont.otf') format('opentype'), 
+         url('fonts/MyCustomFont/MyCustomFont.svg#MyCustomFont') format('svg'); 
+    font-weight: normal;
+    font-style: normal;
+}*/
+
+@font-face {
+    font-family: 'PingPong';
+    src: url('fonts/PingPong/PingPong.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Pong_Game';
+    src: url('fonts/Pong_Game/Pong-Game.otf') format('opentype'),
+         url('fonts/Pong_Game/Pong-Game.ttf') format('truetype'),
+         url('fonts/Pong_Game/Pong-Game.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family: 'PingPong', Arial, sans-serif;
+    font-size: 46px;
+}
+
+p {
+    font-family: 'Pong_Game', Arial, sans-serif;
+    font-size: 16px;
+}
+
+/* --Fonts */
+
+/* Colors-- */
+
+.red {
+    color: red;
+}
+
+.blue {
+    color: blue;
+}
+
+/* --Colors */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #f3f3f3;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+main {
+    padding: 1rem;
+}
+canvas {
+    border: 1px solid #333; /* Bordure pour le canvas */
+    background-color: #fff; /* Fond blanc pour le canvas */
+}
+footer {
+    background-color: #f3f3f3;
+    color: black;
+    text-align: center;
+    padding: 1rem;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}

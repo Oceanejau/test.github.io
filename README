@@ -1,0 +1,29 @@
+icone du site a fix
+site adaptable diff ecrans
+site en simple page app (mise a jour de la page et non refresh total)
+
+? volt pour les .env (ruby )
+
+
+pour maitriser css: frogg site
+
+
+module majeur:
+    web framework backend: django
+    auth a distance: OAuth 2.0 authentication with 42
+    https://oauth.net/2/ https://api.intra.42.fr/apidoc/guides/getting_started
+    https://developers.google.com/identity/protocols/oauth2
+    gestion user standard, auth et tournois:
+    ? multi joueurs              
+    ? autre jeu avec matchmaking ti croix ti ronds
+    ? chat
+    IA game:
+    Parefeu web: WAF ou ModSecurity, HashiCorp Vault
+    ? auth a deux facteurs: Json web tokens
+
+module mineur: 
+
+    web framework frontend: bootstrap toolkit
+    tableau de bord et stats joueur:
+    ? rgpd
+
