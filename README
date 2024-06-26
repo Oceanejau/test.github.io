@@ -33,3 +33,12 @@ ajouter main
 site en une page donc body fixe
 add pong
 responsive
+modifier pied de page pour qu'il soit reconnu par document.querySelector('footer');
+
+OAuth42:
+    récupérer info utilisateur lors du log (pseudo, icone, etc)
+multijoueur:
+    ajouter la bordure du milieu
+    la variable multijoueur
+    les deux raquettes en plus chacune au centre de son terrain
+    les touches de controle en plus
