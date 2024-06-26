@@ -95,6 +95,7 @@ canvas {
 button {
     vertical-align:middle;
     font-weight: bold;
+    color: black;
 }
 /*body, html {
     height: 100%;

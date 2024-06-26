@@ -22,6 +22,10 @@ let ballSpeedY = 5;
 let ballX, ballY;
 let ballDirection = 1; // 1 pour aller vers la droite, -1 pour aller vers la gauche
 
+//scores
+//let score_d = 0
+//let score_g = 0;
+
 // Fonction pour ajuster la taille du canvas
 function ajusterTailleCanvas() {
     
@@ -136,12 +140,12 @@ function draw() {
     if (ballX + ((BALL * canvas.height) / LAR) < 0) { // Si la balle sort par la gauche: le joueur de droite gagne le point
         ballDirection = 1; // Faire aller la balle vers la droite au redémarrage
 		//((score_d + score_g) % 2 ) < 1 ? -1
-        score_d += 1;//score + 1 au player de droite
+       // let score_d += 1;//score + 1 au player de droite
         resetGame();
     }
     if (ballX - ((BALL * canvas.height) / LAR) > canvas.width) { // Si la balle sort par la droite: le joueur de gauche gagne le point
         ballDirection = -1; // Faire aller la balle vers la gauche au redémarrage
-        score_g += 1;//score + 1 au player de gauche
+       // let score_g += 1;//score + 1 au player de gauche
         resetGame();
     }
     requestAnimationFrame(draw);
