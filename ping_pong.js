@@ -17,14 +17,31 @@ let paddleSpeed = 20;
 let leftPaddleY, rightPaddleY;
 let leftPaddleX, rightPaddleX;
 
+let speed = 3;
 let ballSpeedX = 5;
 let ballSpeedY = 5;
 let ballX, ballY;
 let ballDirection = 1; // 1 pour aller vers la droite, -1 pour aller vers la gauche
 
+let isPaused = false;
+let pointsCounter = 0;
+
+let multiplayer = 4;
+
 //scores
-//let score_d = 0
-//let score_g = 0;
+let score_d = 0
+let score_g = 0;
+
+
+// Noms des joueurs
+const playerLeft = "Joueur Gauche";
+const playerRight = "Joueur Droite";
+// Charger la police PingPong
+const font = new FontFace('PingPong', 'url(fonts/PingPong/PingPong.otf)');
+font.load().then(function(loadedFont) {
+    document.fonts.add(loadedFont);
+    draw();
+});
 
 // Fonction pour ajuster la taille du canvas
 function ajusterTailleCanvas() {
@@ -49,10 +66,28 @@ function ajusterTailleCanvas() {
     canvas.height = canvasHeight;
     //afficherDimensionsCadre();
 // Réinitialiser les positions des éléments du jeu en fonction des nouvelles dimensions
-    leftPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
-    rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+	if (multiplayer == 2)
+	{
+		leftPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+    	rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+	}
+	else if (multiplayer == 3)
+	{
+		leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+    	rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+		s = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+	}
+	else if (multiplayer == 4)
+	{
+		leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+    	rightPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+		leftPaddleX = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+    	rightPaddleX = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+	}
+		
 // Réinitialiser la pos de la balle au centre
 	resetBall(); 
+    //isPaused = true;
 }
 
 function afficherDimensionsCadre() {
@@ -78,8 +113,8 @@ function afficherDimensionsCadre() {
 function resetBall() {
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
-    ballSpeedX = ballDirection * 5; // Utiliser la direction actuelle
-    ballSpeedY = (Math.random() > 0.5 ? 1 : -1) * 5; // Changer la direction verticalement aléatoirement
+    ballSpeedX = ballDirection * speed; // Utiliser la direction actuelle
+    ballSpeedY = (Math.random() > 0.5 ? 1 : -1) * speed; // Changer la direction verticalement aléatoirement
 }
 
 function resetGame() {
@@ -101,21 +136,42 @@ function draw() {
     ctx.fillRect(canvas.width - (LIGNES * canvas.height) / LAR, 0, (LIGNES * canvas.height) / LAR, canvas.height);//bordure droite
 //filet
     ctx.fillRect((canvas.width / 2) - (((LIGNES * canvas.height) / LAR) / 2), 0, (LIGNES * canvas.height) / LAR, canvas.height);//filet
-/*//multijoueur : lignes
-	//if (multiplayer)
-    //    ctx.fillRect(0, canvas.height / 2, canvas.width, (LIGNES * canvas.width) / LONG);//ligne au centre
-//multijoueur: raquettes 
-	ctx.fillStyle = 'red';//player de gauche
-	ctx.fillRect(0, leftPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
-	ctx.fillStyle = 'blue';//player de droite
-	ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
-*/
+//multijoueur : lignes
+	if (multiplayer > 2)
+        ctx.fillRect(0, canvas.height / 2, canvas.width, (LIGNES * canvas.width) / LONG);//ligne au centre
 
-//raquettes
-	ctx.fillStyle = 'red';//player de gauche
-	ctx.fillRect(0, leftPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
-	ctx.fillStyle = 'blue';//player de droite
-	ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	//raquettes et multijoueur: raquettes 
+	if (multiplayer == 2)
+	{
+		ctx.fillStyle = 'red';//player de gauche
+		ctx.fillRect(0, leftPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+		ctx.fillStyle = 'blue';//player de droite
+		ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	}
+	else if (multiplayer == 3)
+	{
+		ctx.fillStyle = 'red';//player1 de gauche
+		ctx.fillRect(0, leftPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+		ctx.fillStyle = 'blue';//player1 de droite
+		ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	
+		ctx.fillStyle = 'yellow';//player2 de gauche
+		ctx.fillRect(0, leftPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	}
+	else if (multiplayer == 4)
+	{
+		ctx.fillStyle = 'red';//player1 de gauche
+		ctx.fillRect(0, leftPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+		ctx.fillStyle = 'blue';//player1 de droite
+		ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleY, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	
+		ctx.fillStyle = 'yellow';//player2 de gauche
+		ctx.fillRect(0, leftPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+		ctx.fillStyle = 'green';//player2 de droite
+		ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
+	}
+
+
 
 //balle
 	ctx.beginPath();
@@ -123,10 +179,20 @@ function draw() {
 	ctx.fillStyle = 'white';
 	ctx.fill();
 	ctx.closePath();
-//position de la balle
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
 
+// Affichage des scores
+    ctx.fillStyle = 'white';
+    ctx.font = "30px PingPong";
+    ctx.fillText(score_g, canvas.width / 4, canvas.height / 5);
+    ctx.fillText(score_d, (3 * canvas.width) / 4, canvas.height / 5);
+    //ctx.fillText(playerLeft, canvas.width / 4 - 50, canvas.height / 5 + 30);
+    //ctx.fillText(playerRight, (3 * canvas.width) / 4 - 50, canvas.height / 5 + 30);
+    //position de la balle
+    if (!isPaused)
+    {
+        ballX += ballSpeedX;
+        ballY += ballSpeedY;
+    }
 // collisions bords horizontaux
     if (ballY + ((BALL * canvas.height) / LAR) > canvas.height || ballY - ((BALL * canvas.height) / LAR) < 0)
         ballSpeedY = -ballSpeedY;
@@ -138,15 +204,18 @@ function draw() {
 
 // Réinitialiser le jeu si la balle sort du cadre
     if (ballX + ((BALL * canvas.height) / LAR) < 0) { // Si la balle sort par la gauche: le joueur de droite gagne le point
-        ballDirection = 1; // Faire aller la balle vers la droite au redémarrage
-		//((score_d + score_g) % 2 ) < 1 ? -1
-       // let score_d += 1;//score + 1 au player de droite
-        resetGame();
+       score_d += 1;//score + 1 au player de droite
+       pointsCounter += 1; // Incrémenter le compteur de points
+       if (pointsCounter % 2 === 0)
+           ballDirection = 1; // Faire aller la balle vers la droite tous les deux points
+       resetGame();
     }
     if (ballX - ((BALL * canvas.height) / LAR) > canvas.width) { // Si la balle sort par la droite: le joueur de gauche gagne le point
-        ballDirection = -1; // Faire aller la balle vers la gauche au redémarrage
-       // let score_g += 1;//score + 1 au player de gauche
-        resetGame();
+        score_g += 1;//score + 1 au player de droite
+		pointsCounter += 1; // Incrémenter le compteur de points
+		if (pointsCounter % 2 === 0)
+			ballDirection = -1; // Faire aller la balle vers la droite tous les deux points
+		resetGame();
     }
     requestAnimationFrame(draw);
 }
@@ -170,28 +239,34 @@ document.addEventListener('keydown', (event) => {
             if (leftPaddleY + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
                 leftPaddleY += paddleSpeed;
             break;
-		/*case 'ArrowUp':
-            if (rightPaddleX - paddleSpeed >= 0)
-                rightPaddleX -= paddleSpeed;
-            break;
-        case 'ArrowDown':
-            if (rightPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
-                rightPaddleX += paddleSpeed;
-            break;
-        case 'z':
-            if (leftPaddleX - paddleSpeed >= 0)
+		case 't':
+            if (multiplayer > 2 && leftPaddleX - paddleSpeed >= 0)
                 leftPaddleX -= paddleSpeed;
             break;
-        case 's':
-            if (leftPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
+        case 'g':
+            if (multiplayer > 2 && leftPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
                 leftPaddleX += paddleSpeed;
-            break;*/
+            break;
+        case 'p':
+            if (multiplayer == 4 && rightPaddleX - paddleSpeed >= 0)
+                rightPaddleX -= paddleSpeed;
+            break;
+        case 'm':
+            if (multiplayer == 4 && rightPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
+                rightPaddleX += paddleSpeed;
+            break;
     }
 });
 
+canvas.addEventListener('click', () => {
+    isPaused = !isPaused;
+});
 // Redimensionner le canvas lorsque la fenêtre est redimensionnée
-window.addEventListener('resize', ajusterTailleCanvas);
-
+window.addEventListener('resize', () => {
+	isPaused = true;
+    ajusterTailleCanvas();
+    //isPaused = false; // Reprendre le jeu après le redimensionnement
+});
 // Ajuster la taille du canvas dès le chargement initial
 ajusterTailleCanvas();
 resetBall();

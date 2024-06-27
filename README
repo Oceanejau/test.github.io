@@ -35,6 +35,10 @@ add pong
 responsive
 modifier pied de page pour qu'il soit reconnu par document.querySelector('footer');
 
+Pong:
+    raquettes ne vont pas au bout des tables diff de calcul sur les gauche et droites
+   // resize et trajectoire de la balle a revoir (pause?)
+    //changer police des scores
 OAuth42:
     récupérer info utilisateur lors du log (pseudo, icone, etc)
 multijoueur:
