@@ -12,7 +12,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'pong_css.css'; // Remplacez par le nom de votre fichier CSS
+            link.href = 'style.css'; // Remplacez par le nom de votre fichier CSS
             document.head.appendChild(link);
         });
 
@@ -26,12 +26,17 @@
         }
 
         async function getToken(code) {
-            const response = await fetch('http://localhost:8000/oauth/get-token/', {
-                method: 'POST',
+            const client_id = "u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae";
+            const client_secret = "votre_client_secret"; // Remplacez par votre client secret
+            const redirect_uri = "https://oceanejau.github.io/test.github.io/";
+            const token_url = "https://api.intra.42.fr/oauth/token";
+
+            const response = await fetch(token_url, {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    "Content-Type": "application/x-www-form-urlencoded"
                 },
-                body: new URLSearchParams({ code })
+                body: `grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&code=${code}&redirect_uri=${encodeURIComponent(redirect_uri)}`
             });
 
             const data = await response.json();
@@ -39,12 +44,12 @@
         }
 
         async function getUserInfo(token) {
-            const response = await fetch('http://localhost:8000/oauth/get-user-info/', {
-                method: 'POST',
+            const user_url = "https://api.intra.42.fr/v2/me"; // Pour obtenir les informations de l'utilisateur connecté
+
+            const response = await fetch(user_url, {
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ token })
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
             const userInfo = await response.json();
@@ -53,6 +58,7 @@
 
         function displayUserInfo(userInfo) {
             const userInfoDiv = document.getElementById('userInfo');
+            console.log("display info user");
             userInfoDiv.innerHTML = `
                 <h2>Informations de l'utilisateur</h2>
                 <p><strong>ID :</strong> ${userInfo.id}</p>
@@ -97,7 +103,7 @@
     </main>
     <footer>
         <button id="OAuth42" onclick="redirect()">SIGN IN WITH <img src="img/icone/42logo.png" alt="Image" height="21" width="21"></button>
-        <div id="userInfo"></div>
+<div id="userInfo"></div>
         <p>&copy; 2024 Transcendence</p>
     </footer>
 </body>
