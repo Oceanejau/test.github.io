@@ -12,7 +12,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'pong_css.css';
+            link.href = 'pong_css.css'; // Remplacez par le nom de votre fichier CSS
             document.head.appendChild(link);
         });
 
@@ -26,17 +26,12 @@
         }
 
         async function getToken(code) {
-            const client_id = "u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae";
-            const client_secret = "votre_client_secret"; // Remplacez par votre client secret
-            const redirect_uri = "https://oceanejau.github.io/test.github.io/";
-            const token_url = "https://api.intra.42.fr/oauth/token";
-
-            const response = await fetch(token_url, {
-                method: "POST",
+            const response = await fetch('http://localhost:8000/oauth/get-token/', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: `grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&code=${code}&redirect_uri=${encodeURIComponent(redirect_uri)}`
+                body: new URLSearchParams({ code })
             });
 
             const data = await response.json();
@@ -44,12 +39,12 @@
         }
 
         async function getUserInfo(token) {
-            const user_url = "https://api.intra.42.fr/v2/me"; // Pour obtenir les informations de l'utilisateur connecté
-
-            const response = await fetch(user_url, {
+            const response = await fetch('http://localhost:8000/oauth/get-user-info/', {
+                method: 'POST',
                 headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ token })
             });
 
             const userInfo = await response.json();
