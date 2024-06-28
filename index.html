@@ -12,12 +12,75 @@
         document.addEventListener("DOMContentLoaded", function() {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = config.cssFileName;
+            link.href = 'style.css'; // Remplacez par le nom de votre fichier CSS
             document.head.appendChild(link);
         });
+
         function redirect() {
-            window.location.href = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae&redirect_uri=https%3A%2F%2Foceanejau.github.io%2Ftest.github.io%2F&response_type=code";
+            const client_id = "u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae";
+            const redirect_uri = "https://oceanejau.github.io/test.github.io/";
+            const response_type = "code";
+            const auth_url = `https://api.intra.42.fr/oauth/authorize?client_id=${client_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=${response_type}`;
+
+            window.location.href = auth_url;
         }
+
+        async function getToken(code) {
+            const client_id = "u-s4t2ud-00d16a6189e88b09e29da3901b88914a2c9cbaea9f694ef4b02070089c7abcae";
+            const client_secret = "votre_client_secret"; // Remplacez par votre client secret
+            const redirect_uri = "https://oceanejau.github.io/test.github.io/";
+            const token_url = "https://api.intra.42.fr/oauth/token";
+
+            const response = await fetch(token_url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `grant_type=authorization_code&client_id=${client_id}&client_secret=${client_secret}&code=${code}&redirect_uri=${encodeURIComponent(redirect_uri)}`
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        async function getUserInfo(token) {
+            const user_url = "https://api.intra.42.fr/v2/me"; // Pour obtenir les informations de l'utilisateur connecté
+
+            const response = await fetch(user_url, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            const userInfo = await response.json();
+            displayUserInfo(userInfo); // Afficher les informations de l'utilisateur
+        }
+
+        function displayUserInfo(userInfo) {
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `
+                <h2>Informations de l'utilisateur</h2>
+                <p><strong>ID :</strong> ${userInfo.id}</p>
+                <p><strong>Login :</strong> ${userInfo.login}</p>
+                <p><strong>Prénom :</strong> ${userInfo.first_name}</p>
+                <p><strong>Nom :</strong> ${userInfo.last_name}</p>
+                <p><strong>Email :</strong> ${userInfo.email}</p>
+                <p><strong>Image :</strong> <img src="${userInfo.image_url}" alt="Photo de profil" height="100"></p>
+            `;
+        }
+
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                const token = await getToken(code);
+                await getUserInfo(token);
+            }
+        }
+
+        // Vérifiez si nous sommes de retour de l'autorisation avec un code
+        document.addEventListener("DOMContentLoaded", handleCallback);
     </script>
 </head>
 <body>
@@ -39,7 +102,7 @@
     </main>
     <footer>
         <button id="OAuth42" onclick="redirect()">SIGN IN WITH <img src="img/icone/42logo.png" alt="Image" height="21" width="21"></button>
-
+        <div id="userInfo"></div>
         <p>&copy; 2024 Transcendence</p>
     </footer>
 </body>
