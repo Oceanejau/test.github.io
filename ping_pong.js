@@ -31,8 +31,7 @@ let multiplayer = 4 ;
 //scores
 let score_d = 0
 let score_g = 0;
-
-
+let score_max = 11;
 
 //////////////////////////////////
 
@@ -48,8 +47,11 @@ let draggingRightPaddleX = false;
 
 
 // Noms des joueurs
-const playerLeft = "Joueur Gauche";
-const playerRight = "Joueur Droite";
+const playerLeft_1 = "playerLeft_1";
+const playerRight_1 = "playerRight_1";
+const playerLeft_2 = "playerLeft_2";
+const playerRight_2 = "playerRight_2";
+
 // Charger la police PingPong
 const font = new FontFace('PingPong', 'url(fonts/PingPong/PingPong.otf)');
 font.load().then(function(loadedFont) {
@@ -58,8 +60,8 @@ font.load().then(function(loadedFont) {
 });
 
 // Fonction pour ajuster la taille du canvas
-function ajusterTailleCanvas() {
-    
+function ajusterTailleCanvas()
+{    
     const headerElement = document.querySelector('header');
     const headerHeight = headerElement ? headerElement.offsetHeight : 0;
     const footerElement = document.querySelector('footer');
@@ -108,7 +110,8 @@ function ajusterTailleCanvas() {
     //isPaused = true;
 }
 
-function afficherDimensionsCadre() {
+function afficherDimensionsCadre()
+{
     const largeurCadre = canvas.width;
     const hauteurCadre = canvas.height;
     console.log("Début de l'exécution du script...");
@@ -128,14 +131,16 @@ function afficherDimensionsCadre() {
     console.log(`Hauteur disponible pour le canvas : ${availableHeight}px`);
 }
 
-function resetBall() {
+function resetBall()
+{
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
     ballSpeedX = ballDirection * speed; // Utiliser la direction actuelle
     ballSpeedY = (Math.random() > 0.5 ? 1 : -1) * speed; // Changer la direction verticalement aléatoirement
 }
 
-function resetGame() {
+function resetGame()
+{
     resetBall();
     if (multiplayer == 3)
     {
@@ -157,7 +162,71 @@ function resetGame() {
     }
 }
 
-function draw() {
+function resetNewGame()
+{
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    score_d = 0;
+    score_g = 0;
+    isPaused = true;
+    pointsCounter = 0;
+    speed = 3;
+    ballSpeedX = 5;
+    ballSpeedY = 5;
+    resetBall();
+    resetGame();
+    draw();
+}
+
+function endGame()
+{
+    isPaused = true;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (score_d == score_max)
+    {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = "40px PingPong";
+        ctx.textAlign = 'center';
+        if (multiplayer <= 2)
+            gagnant = playerRight_1;
+        else
+            gagnant = playerRight_1 + " & " + playerRight_2;
+        ctx.fillText(`Le ${gagnant} a gagné!`, canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillText('Cliquez pour rejouer', canvas.width / 2, canvas.height / 2 + 20);
+        requestAnimationFrame(draw);
+
+        // Ajouter un écouteur pour le clic pour rejouer
+        console.log("joueur de droite gagne");
+        canvas.addEventListener('click', resetNewGame, { once: true });
+
+    }
+    else if (score_g == score_max)
+    {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = "40px PingPong";
+        ctx.textAlign = 'center';
+        if (multiplayer <= 2)
+            gagnant = playerLeft_1;
+        else
+            gagnant = playerLeft_1 + " & " + playerLeft_2;
+        ctx.fillText(`Le ${gagnant} a gagné!`, canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillText('Cliquez pour rejouer', canvas.width / 2, canvas.height / 2 + 20);
+        requestAnimationFrame(draw);
+        // Ajouter un écouteur pour le clic pour rejouer
+        console.log("joueur de droite gagne");
+        canvas.addEventListener('click', resetNewGame, { once: true });
+
+    }
+    else
+    {
+        //gave up
+    }
+}
+
+function draw()
+{
 // Effacer le canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 //typo de la fonction : void ctx.fillRect(x, y, largeur, hauteur);
@@ -205,8 +274,6 @@ function draw() {
 		ctx.fillRect(canvas.width - ((PADDLE_EP * canvas.height) / LAR), rightPaddleX, (PADDLE_EP * canvas.height) / LAR, (PADDLE_LAR * canvas.height) / LAR);
 	}
 
-
-
 //balle
 	ctx.beginPath();
 	ctx.arc(ballX, ballY, ((BALL * canvas.height) / LAR), 0, Math.PI * 2);
@@ -235,21 +302,24 @@ function draw() {
         ballSpeedX = -ballSpeedX;
     if (ballX + ((BALL * canvas.height) / LAR) > canvas.width - ((PADDLE_EP * canvas.height) / LAR) && ballY > rightPaddleY && ballY < rightPaddleY + ((PADDLE_LAR * canvas.height) / LAR))
         ballSpeedX = -ballSpeedX;
-
 // Réinitialiser le jeu si la balle sort du cadre
     if (ballX + ((BALL * canvas.height) / LAR) < 0) { // Si la balle sort par la gauche: le joueur de droite gagne le point
        score_d += 1;//score + 1 au player de droite
        pointsCounter += 1; // Incrémenter le compteur de points
-       if (pointsCounter % 2 === 0)
-           ballDirection = 1; // Faire aller la balle vers la droite tous les deux points
+       if (pointsCounter % 2 == 0)
+           ballDirection = ballDirection * (-1); // Faire aller la balle vers la droite tous les deux points
+       if (score_d == score_max)
+        endGame();
        resetGame();
     }
     if (ballX - ((BALL * canvas.height) / LAR) > canvas.width) { // Si la balle sort par la droite: le joueur de gauche gagne le point
         score_g += 1;//score + 1 au player de droite
 		pointsCounter += 1; // Incrémenter le compteur de points
-		if (pointsCounter % 2 === 0)
-			ballDirection = -1; // Faire aller la balle vers la droite tous les deux points
-		resetGame();
+        if (pointsCounter % 2 == 0)
+			ballDirection = ballDirection * (-1); // Faire aller la balle vers la droite tous les deux points
+        if (score_g == score_max)
+            endGame();
+        resetGame();
     }
     requestAnimationFrame(draw);
 }
@@ -258,91 +328,90 @@ function draw() {
 document.addEventListener('keydown', (event) => {
     switch(event.key) {
         case 'ArrowUp':
-            if (rightPaddleY - paddleSpeed >= 0)
-                rightPaddleY -= paddleSpeed;
+            rightPaddleY = movePaddle(-paddleSpeed, rightPaddleY);
             break;
         case 'ArrowDown':
-            if (rightPaddleY + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
-                rightPaddleY += paddleSpeed;
+            rightPaddleY = movePaddle(paddleSpeed, rightPaddleY);
             break;
         case 'z':
-            if (leftPaddleY - paddleSpeed >= 0)
-                leftPaddleY -= paddleSpeed;
+            leftPaddleY = movePaddle(-paddleSpeed, leftPaddleY);
             break;
         case 's':
-            if (leftPaddleY + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
-                leftPaddleY += paddleSpeed;
+            leftPaddleY = movePaddle(paddleSpeed, leftPaddleY);
             break;
-		case 't':
-            if (multiplayer > 2 && leftPaddleX - paddleSpeed >= 0)
-                leftPaddleX -= paddleSpeed;
+        case 't':
+            if (multiplayer > 2)
+                leftPaddleX = movePaddle(-paddleSpeed, leftPaddleX);
             break;
         case 'g':
-            if (multiplayer > 2 && leftPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
-                leftPaddleX += paddleSpeed;
+            if (multiplayer > 2)
+                leftPaddleX = movePaddle(paddleSpeed, leftPaddleX);
             break;
         case 'p':
-            if (multiplayer == 4 && rightPaddleX - paddleSpeed >= 0)
-                rightPaddleX -= paddleSpeed;
+            if (multiplayer == 4)
+                rightPaddleX = movePaddle(-paddleSpeed, rightPaddleX);
             break;
         case 'm':
-            if (multiplayer == 4 && rightPaddleX + paddleSpeed + ((PADDLE_LAR * canvas.height) / LAR) <= canvas.height)
-                rightPaddleX += paddleSpeed;
+            if (multiplayer == 4)
+                rightPaddleX = movePaddle(paddleSpeed, rightPaddleX);
             break;
     }
 });
 
+function movePaddle(deltaY, paddleY) {
+    return Math.min(Math.max(paddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+}
 
 /////////////////////////////////////////
 // Gestion des événements de souris
 
-
-function getClickedPaddle(x, y) {
+function getClickedPaddle(x, y)
+{
     const paddleWidth = (PADDLE_EP * canvas.height) / LAR;
     const paddleHeight = (PADDLE_LAR * canvas.height) / LAR;
 
-    if (x >= 0 && x <= paddleWidth && y >= leftPaddleY && y <= leftPaddleY + paddleHeight) {
+    if (x >= 0 && x <= paddleWidth && y >= leftPaddleY && y <= leftPaddleY + paddleHeight)
+    {
         console.log("left top");
         let isDragging = true;
         let draggingLeftPaddle = true;
-
         return 'left';
     }
-    if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleY && y <= rightPaddleY + paddleHeight) {
+    if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleY && y <= rightPaddleY + paddleHeight)
+    {
         console.log("right top");
         let isDragging = true;
         let draggingRightPaddle = true;
-
         return 'right';
     }
-    if (multiplayer > 2) {
-        // Palette gauche supplémentaire
-        if (x >= 0 && x <= paddleWidth && y >= leftPaddleX && y <= leftPaddleX + paddleHeight) {
+    if (multiplayer > 2)
+    {
+        if (x >= 0 && x <= paddleWidth && y >= leftPaddleX && y <= leftPaddleX + paddleHeight)
+        {
             console.log("left bot");
             let isDragging = true;
             let draggingLeftPaddleX = true;
-
             return 'leftExtra';
         }
-
-        // Palette droite supplémentaire
-        if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleX && y <= rightPaddleX + paddleHeight) {
+        if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleX && y <= rightPaddleX + paddleHeight) 
+        {
             console.log("right bot");
             let isDragging = true;
             let draggingRightPaddleX = true;
-
             return 'rightExtra';
         }
     }
     console.log("random clic");
-
-    // Si aucune palette n'est cliquée, retourner null
     return null;
 }
 
 function movePaddle(deltaY, paddleY) {
     return Math.min(Math.max(paddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
 }
+/*
+deltaY : vertical + = down & - = up.
+paddleY : pos verticale
+ */
 
 canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -354,27 +423,11 @@ canvas.addEventListener('mousedown', (event) => {
 
     if (clickedPaddle)
     {
-        canvas.addEventListener('mousemove', movePaddle);
+        canvas.addEventListener('mousemove', moveHandler);
         canvas.addEventListener('mouseup', () => {
-            canvas.removeEventListener('mousemove', movePaddle);
+            canvas.removeEventListener('mousemove', moveHandler);
         });
-/*
-
-  const deltaX = event.touches[0].clientX - dragStartX;
-        const deltaY = event.touches[0].clientY - dragStartY;
-        movePaddle(deltaX, deltaY);
-        dragStartX = event.touches[0].clientX;
-        dragStartY = event.touches[0].clientY;
-
-
-function movePaddle(deltaY, paddleY) {
-    return Math.min(Math.max(paddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-}
-*/
-        //function movePaddle(e)
-       // {
-         //   const newY = e.clientY - rect.top - paddleHeight / 2;
-         function moveHandler(e) {
+        function moveHandler(e) {
             const newY = e.clientY - rect.top;
             const deltaY = newY - dragStartY;
             dragStartY = newY; // Mettre à jour dragStartY pour le prochain déplacement
@@ -393,123 +446,26 @@ function movePaddle(deltaY, paddleY) {
                     rightPaddleX = movePaddle(deltaY, rightPaddleX);
                     break;
             }
-        }
-            /*switch (clickedPaddle) {
-                case 'left':
-                    leftPaddleY = movePaddle((event.touches[0].clientY - dragStartY), );
-                    //if (newY >= 0 && newY <= canvas.height - paddleHeight) {
-                      //  leftPaddleY = newY;
-                    //}
-                    break;
-                case 'right':
-                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
-                        rightPaddleY = newY;
-                    }
-                    break;
-                case 'leftExtra':
-                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
-                        leftPaddleX = newY;
-                    }
-                    break;
-                case 'rightExtra':
-                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
-                        rightPaddleX = newY;
-                    }
-                    break;
-            }*/
-        
+        }        
     }
 });
 
 
-function isTouchingPaddle(x, y, paddleX, paddleY, paddleWidth, paddleHeight) {
+function isTouchingPaddle(x, y, paddleX, paddleY, paddleWidth, paddleHeight)
+{
     return x >= paddleX && x <= paddleX + paddleWidth && y >= paddleY && y <= paddleY + paddleHeight;
 }
 
-
-
-/*canvas.addEventListener('mousedown', (event) => {
-    isDragging = true;
-    dragStartX = event.clientX;
-    dragStartY = event.clientY;
-});
-
-canvas.addEventListener('mousemove', (event) => {
-    if (isDragging) {
-        const deltaX = event.clientX - dragStartX;
-        const deltaY = event.clientY - dragStartY;
-        movePaddle(deltaX, deltaY);
-        dragStartX = event.clientX;
-        dragStartY = event.clientY;
-    }
-});
-
-canvas.addEventListener('mouseup', () => {
-    isDragging = false;
-});
-
-// Gestion des événements tactiles
-canvas.addEventListener('touchstart', (event) => {
-    isDragging = true;
-    dragStartX = event.touches[0].clientX;
-    dragStartY = event.touches[0].clientY;
-});
-
-canvas.addEventListener('touchmove', (event) => {
-    if (isDragging) {
-        const deltaX = event.touches[0].clientX - dragStartX;
-        const deltaY = event.touches[0].clientY - dragStartY;
-        movePaddle(deltaX, deltaY);
-        dragStartX = event.touches[0].clientX;
-        dragStartY = event.touches[0].clientY;
-    }
-});
-
-canvas.addEventListener('touchend', () => {
-    isDragging = false;
-});
-
-// Fonction pour déplacer les raquettes
-function movePaddle(deltaX, deltaY) {
-    if (multiplayer == 2) {
-        if (dragStartX < canvas.width / 2) {
-            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        } else {
-            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        }
-    } else if (multiplayer == 3) {
-        if (dragStartX < canvas.width / 2) {
-            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-            leftPaddleX = Math.min(Math.max(leftPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        } else {
-            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        }
-    } else if (multiplayer == 4) {
-        if (dragStartX < canvas.width / 2) {
-            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-            leftPaddleX = Math.min(Math.max(leftPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        } else {
-            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-            rightPaddleX = Math.min(Math.max(rightPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
-        }
-    }
-}*/
-
-
-
-/////////////////////////////////
+////////////////////////////////
 
 
 canvas.addEventListener('click', () => {
     isPaused = !isPaused;
 });
-// Redimensionner le canvas lorsque la fenêtre est redimensionnée
 window.addEventListener('resize', () => {
 	isPaused = true;
     ajusterTailleCanvas();
-    //isPaused = false; // Reprendre le jeu après le redimensionnement
 });
-// Ajuster la taille du canvas dès le chargement initial
 ajusterTailleCanvas();
 resetBall();
 draw();
