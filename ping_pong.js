@@ -23,14 +23,28 @@ let ballSpeedY = 5;
 let ballX, ballY;
 let ballDirection = 1; // 1 pour aller vers la droite, -1 pour aller vers la gauche
 
-let isPaused = false;
+let isPaused = true;
 let pointsCounter = 0;
 
-let multiplayer = 4;
+let multiplayer = 4 ;
 
 //scores
 let score_d = 0
 let score_g = 0;
+
+
+
+//////////////////////////////////
+
+// Variables pour suivre le glissement
+let isDragging = false;
+let dragStartX, dragStartY;
+
+let draggingLeftPaddle = false;
+let draggingRightPaddle = false;
+let draggingLeftPaddleX = false;
+let draggingRightPaddleX = false;
+////////////////////////////////////////
 
 
 // Noms des joueurs
@@ -64,6 +78,7 @@ function ajusterTailleCanvas() {
     }
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+
     //afficherDimensionsCadre();
 // Réinitialiser les positions des éléments du jeu en fonction des nouvelles dimensions
 	if (multiplayer == 2)
@@ -75,16 +90,19 @@ function ajusterTailleCanvas() {
 	{
 		leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
     	rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
-		s = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+		leftPaddleX = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;//*3 pour position mileu bas
 	}
 	else if (multiplayer == 4)
 	{
 		leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
     	rightPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
-		leftPaddleX = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
-    	rightPaddleX = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+		leftPaddleX = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;//* 3 pour position milieu bas
+    	rightPaddleX = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;// * 3 pour position milieu
 	}
-		
+	
+    let fontSize = canvasHeight * 0.05; // Par exemple, 5% de la hauteur du canvas
+    fontSize = Math.min(fontSize, 40); // Limiter la taille maximale à 30px
+    ctx.font = `${fontSize}px PingPong`;
 // Réinitialiser la pos de la balle au centre
 	resetBall(); 
     //isPaused = true;
@@ -102,7 +120,7 @@ function afficherDimensionsCadre() {
     if (!footerElement) 
         console.log("Avertissement : Aucun élément <footer> trouvé dans le document.");
     const headerHeight = headerElement ? headerElement.offsetHeight : 0;
-    const footerHeight = footerElement ? footerElement.offsetHeight : 0;
+    const footerHeight = footerElement ? footerElement.offsetHeight : 0; 
     const availableHeight = window.innerHeight - headerHeight - footerHeight;
     console.log(`Hauteur totale : ${window.innerHeight}px`);
     console.log(`Hauteur de l'en-tête : ${headerHeight}px`);
@@ -119,8 +137,24 @@ function resetBall() {
 
 function resetGame() {
     resetBall();
-    leftPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
-    rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+    if (multiplayer == 3)
+    {
+        leftPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+        rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+    }
+    else if (multiplayer == 3)
+    {
+        leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+        rightPaddleY = canvas.height / 2 - ((PADDLE_LAR * canvas.height) / LAR) / 2;
+        leftPaddleY = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;
+    }
+    else if (multiplayer == 4)
+    {
+        leftPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+        rightPaddleY = canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4;
+        leftPaddleX = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;
+        rightPaddleX = (canvas.height / 4 - ((PADDLE_LAR * canvas.height) / LAR) / 4) * 3;
+    }
 }
 
 function draw() {
@@ -182,9 +216,9 @@ function draw() {
 
 // Affichage des scores
     ctx.fillStyle = 'white';
-    ctx.font = "30px PingPong";
-    ctx.fillText(score_g, canvas.width / 4, canvas.height / 5);
-    ctx.fillText(score_d, (3 * canvas.width) / 4, canvas.height / 5);
+   // ctx.font = "30px PingPong";
+    ctx.fillText(score_g, canvas.width / 4, canvas.height / 8);
+    ctx.fillText(score_d, (3 * canvas.width) / 4, canvas.height / 8);
     //ctx.fillText(playerLeft, canvas.width / 4 - 50, canvas.height / 5 + 30);
     //ctx.fillText(playerRight, (3 * canvas.width) / 4 - 50, canvas.height / 5 + 30);
     //position de la balle
@@ -257,6 +291,214 @@ document.addEventListener('keydown', (event) => {
             break;
     }
 });
+
+
+/////////////////////////////////////////
+// Gestion des événements de souris
+
+
+function getClickedPaddle(x, y) {
+    const paddleWidth = (PADDLE_EP * canvas.height) / LAR;
+    const paddleHeight = (PADDLE_LAR * canvas.height) / LAR;
+
+    if (x >= 0 && x <= paddleWidth && y >= leftPaddleY && y <= leftPaddleY + paddleHeight) {
+        console.log("left top");
+        let isDragging = true;
+        let draggingLeftPaddle = true;
+
+        return 'left';
+    }
+    if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleY && y <= rightPaddleY + paddleHeight) {
+        console.log("right top");
+        let isDragging = true;
+        let draggingRightPaddle = true;
+
+        return 'right';
+    }
+    if (multiplayer > 2) {
+        // Palette gauche supplémentaire
+        if (x >= 0 && x <= paddleWidth && y >= leftPaddleX && y <= leftPaddleX + paddleHeight) {
+            console.log("left bot");
+            let isDragging = true;
+            let draggingLeftPaddleX = true;
+
+            return 'leftExtra';
+        }
+
+        // Palette droite supplémentaire
+        if (x >= canvas.width - paddleWidth && x <= canvas.width && y >= rightPaddleX && y <= rightPaddleX + paddleHeight) {
+            console.log("right bot");
+            let isDragging = true;
+            let draggingRightPaddleX = true;
+
+            return 'rightExtra';
+        }
+    }
+    console.log("random clic");
+
+    // Si aucune palette n'est cliquée, retourner null
+    return null;
+}
+
+function movePaddle(deltaY, paddleY) {
+    return Math.min(Math.max(paddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+}
+
+canvas.addEventListener('mousedown', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    let dragStartY = y;
+
+    const clickedPaddle = getClickedPaddle(x, y);
+
+    if (clickedPaddle)
+    {
+        canvas.addEventListener('mousemove', movePaddle);
+        canvas.addEventListener('mouseup', () => {
+            canvas.removeEventListener('mousemove', movePaddle);
+        });
+/*
+
+  const deltaX = event.touches[0].clientX - dragStartX;
+        const deltaY = event.touches[0].clientY - dragStartY;
+        movePaddle(deltaX, deltaY);
+        dragStartX = event.touches[0].clientX;
+        dragStartY = event.touches[0].clientY;
+
+
+function movePaddle(deltaY, paddleY) {
+    return Math.min(Math.max(paddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+}
+*/
+        //function movePaddle(e)
+       // {
+         //   const newY = e.clientY - rect.top - paddleHeight / 2;
+         function moveHandler(e) {
+            const newY = e.clientY - rect.top;
+            const deltaY = newY - dragStartY;
+            dragStartY = newY; // Mettre à jour dragStartY pour le prochain déplacement
+
+            switch (clickedPaddle) {
+                case 'left':
+                    leftPaddleY = movePaddle(deltaY, leftPaddleY);
+                    break;
+                case 'right':
+                    rightPaddleY = movePaddle(deltaY, rightPaddleY);
+                    break;
+                case 'leftExtra':
+                    leftPaddleX = movePaddle(deltaY, leftPaddleX);
+                    break;
+                case 'rightExtra':
+                    rightPaddleX = movePaddle(deltaY, rightPaddleX);
+                    break;
+            }
+        }
+            /*switch (clickedPaddle) {
+                case 'left':
+                    leftPaddleY = movePaddle((event.touches[0].clientY - dragStartY), );
+                    //if (newY >= 0 && newY <= canvas.height - paddleHeight) {
+                      //  leftPaddleY = newY;
+                    //}
+                    break;
+                case 'right':
+                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
+                        rightPaddleY = newY;
+                    }
+                    break;
+                case 'leftExtra':
+                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
+                        leftPaddleX = newY;
+                    }
+                    break;
+                case 'rightExtra':
+                    if (newY >= 0 && newY <= canvas.height - paddleHeight) {
+                        rightPaddleX = newY;
+                    }
+                    break;
+            }*/
+        
+    }
+});
+
+
+function isTouchingPaddle(x, y, paddleX, paddleY, paddleWidth, paddleHeight) {
+    return x >= paddleX && x <= paddleX + paddleWidth && y >= paddleY && y <= paddleY + paddleHeight;
+}
+
+
+
+/*canvas.addEventListener('mousedown', (event) => {
+    isDragging = true;
+    dragStartX = event.clientX;
+    dragStartY = event.clientY;
+});
+
+canvas.addEventListener('mousemove', (event) => {
+    if (isDragging) {
+        const deltaX = event.clientX - dragStartX;
+        const deltaY = event.clientY - dragStartY;
+        movePaddle(deltaX, deltaY);
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+// Gestion des événements tactiles
+canvas.addEventListener('touchstart', (event) => {
+    isDragging = true;
+    dragStartX = event.touches[0].clientX;
+    dragStartY = event.touches[0].clientY;
+});
+
+canvas.addEventListener('touchmove', (event) => {
+    if (isDragging) {
+        const deltaX = event.touches[0].clientX - dragStartX;
+        const deltaY = event.touches[0].clientY - dragStartY;
+        movePaddle(deltaX, deltaY);
+        dragStartX = event.touches[0].clientX;
+        dragStartY = event.touches[0].clientY;
+    }
+});
+
+canvas.addEventListener('touchend', () => {
+    isDragging = false;
+});
+
+// Fonction pour déplacer les raquettes
+function movePaddle(deltaX, deltaY) {
+    if (multiplayer == 2) {
+        if (dragStartX < canvas.width / 2) {
+            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        } else {
+            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        }
+    } else if (multiplayer == 3) {
+        if (dragStartX < canvas.width / 2) {
+            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+            leftPaddleX = Math.min(Math.max(leftPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        } else {
+            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        }
+    } else if (multiplayer == 4) {
+        if (dragStartX < canvas.width / 2) {
+            leftPaddleY = Math.min(Math.max(leftPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+            leftPaddleX = Math.min(Math.max(leftPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        } else {
+            rightPaddleY = Math.min(Math.max(rightPaddleY + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+            rightPaddleX = Math.min(Math.max(rightPaddleX + deltaY, 0), canvas.height - (PADDLE_LAR * canvas.height) / LAR);
+        }
+    }
+}*/
+
+
+
+/////////////////////////////////
+
 
 canvas.addEventListener('click', () => {
     isPaused = !isPaused;

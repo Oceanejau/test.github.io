@@ -40,7 +40,6 @@ responsive
 modifier pied de page pour qu'il soit reconnu par document.querySelector('footer');
 
 Pong:
-    score, taille de police qui se modifie lors du resize de la fenetre
     raquettes ne vont pas au bout des tables diff de calcul sur les gauche et droites
    // resize et trajectoire de la balle a revoir (pause?)
     //changer police des scores
